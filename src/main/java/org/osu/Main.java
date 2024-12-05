@@ -15,9 +15,8 @@ public class Main {
                 new InstructionCommand(Instruction.LOAD, "=", 1),    // Initialize register 1 with 1 (multiplicative identity)
                 new InstructionCommand(Instruction.STORE, "=", 1),   // Store the value 1 in register 1
                 new InstructionCommand(Instruction.READ, "*", 0),    // Read the first number from the tape into register 0
-                new InstructionCommand(Instruction.JZ, "", 8),      // If the value is 0, jump to WRITE (end of input)
                 new InstructionCommand(Instruction.MUL, "*", 0),     // Multiply the value in register 1 (accumulated product) with the value in register 0
-                new InstructionCommand(Instruction.JZ, "", 8),      // If the value is 0, jump to WRITE (end of input)
+                new InstructionCommand(Instruction.JZ, "", 7),      // If the value is 0, jump to WRITE (end of input)
                 new InstructionCommand(Instruction.STORE, "=", 1),   // Store the accumulated result back into register 1
                 new InstructionCommand(Instruction.JMP, "=", 2),     // Jump back to READ to process the next number
                 new InstructionCommand(Instruction.WRITE, "*", 1),   // Write the final result (product) in register 1 to the output tape
