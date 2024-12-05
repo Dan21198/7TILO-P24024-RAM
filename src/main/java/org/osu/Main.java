@@ -11,20 +11,20 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         // Task 1 fun(n_1, n_2, ... , n_m) = Π_{i=1}^{m} n_i | n_i ∈ N^+, m > 0
-        // TODO: impl
         List<InstructionCommand> task1Multiply = Arrays.asList(
-                new InstructionCommand(Instruction.LOAD, "*", 0),    // Load the first number from the tape into register 0
-                new InstructionCommand(Instruction.STORE, "=", 1),   // Store the value in register 0 into register 1 (initial product)
-                new InstructionCommand(Instruction.READ, "*", 1),    // Read the next value from the tape (start from the second value)
-                new InstructionCommand(Instruction.JZ, "=", 8),      // If the value is 0, jump to WRITE (end of input)
-                new InstructionCommand(Instruction.MUL, "*", 1),    // Multiply the value in register 1 (accumulated product) with the value in register 1
+                new InstructionCommand(Instruction.LOAD, "=", 1),    // Initialize register 1 with 1 (multiplicative identity)
+                new InstructionCommand(Instruction.STORE, "=", 1),   // Store the value 1 in register 1
+                new InstructionCommand(Instruction.READ, "*", 0),    // Read the first number from the tape into register 0
+                new InstructionCommand(Instruction.JZ, "", 8),      // If the value is 0, jump to WRITE (end of input)
+                new InstructionCommand(Instruction.MUL, "*", 0),     // Multiply the value in register 1 (accumulated product) with the value in register 0
+                new InstructionCommand(Instruction.JZ, "", 8),      // If the value is 0, jump to WRITE (end of input)
                 new InstructionCommand(Instruction.STORE, "=", 1),   // Store the accumulated result back into register 1
                 new InstructionCommand(Instruction.JMP, "=", 2),     // Jump back to READ to process the next number
-                new InstructionCommand(Instruction.WRITE, "=", 1),   // Write the final result (product) in register 1 to the output tape
+                new InstructionCommand(Instruction.WRITE, "*", 1),   // Write the final result (product) in register 1 to the output tape
                 new InstructionCommand(Instruction.HALT, "=", 0)     // Halt the program when finished
         );
 
-        Tape inputTape = new Tape(0, Arrays.asList(1, 3, 10, 5, 20, 0));
+        Tape inputTape = new Tape(0, Arrays.asList(3, 10, 5, 20, 0));
         List<InstructionCommand> instructionCommands1 = task1Multiply;
         int additionalRegistries1 = 4;
         RAM RAM1 = new RAM(inputTape, instructionCommands1, additionalRegistries1);
