@@ -27,7 +27,7 @@ public class RAM {
         while (isRunning) {
             InstructionCommand c = instructionCommands.get(initialCommandIndex);
             switch (c.instruction) {
-                case READ -> read(c.value, c.operand);
+                case READ -> read(c.operand);
                 case WRITE -> write(c, c.operand);
                 case LOAD -> load(c, c.operand);
                 case STORE -> store(c, c.operand);
@@ -62,38 +62,60 @@ public class RAM {
         outputTape.content.forEach(c -> System.out.print(c + " "));
     }
 
-    private void read(int value, String operand) {
-        if (operand == null) {
-            // Read from tape to register[0]
-            register.set(value, inputTape.content.get(inputTape.head));
+    private void read(String operand) {
+        // Get the value at the current head position of the input tape
+        int value = inputTape.content.get(inputTape.head);
+        System.out.println("Reading value: " + value);
+
+        if (operand.isEmpty()) {
+            // If operand is empty, store the value in register[0]
+            register.set(0, value);
+        } else {
+            // If operand is not empty, store the value in the specified register
+            int registerIndex = Integer.parseInt(operand); // Convert operand to register index
+            register.set(registerIndex, value);
         }
+
+        // Move the tape head to the next symbol after reading
         inputTape.head++;
     }
 
     private void write(InstructionCommand instructionCommand, String operand) {
-        if (operand == null) {
-            // Write the value of register[0] to output
-            outputTape.content.add(register.get(instructionCommand.value));
+        if (operand.isEmpty()) {
+            // Direct addressing: Write the value of register[instructionCommand.value] to output
+            int valueToWrite = register.get(instructionCommand.value);
+            outputTape.content.add(valueToWrite);
         } else if (operand.equals("=")) {
-            // Write the constant value to output
+            // Constant addressing: Write the constant value from instructionCommand to output
             outputTape.content.add(instructionCommand.value);
         } else if (operand.equals("*")) {
-            // Indirect addressing: Write register[register[0] + value] to output
-            outputTape.content.add(register.get(register.get(0) + instructionCommand.value));
+            // Indirect addressing: Write the value in register[register[0] + instructionCommand.value] to output
+            int address = register.get(0) + instructionCommand.value;
+            if (address < 0 || address >= register.size()) {
+                throw new IndexOutOfBoundsException("Invalid address: " + address);
+            }
+            outputTape.content.add(register.get(address));
+        } else {
+            throw new IllegalArgumentException("Invalid operand for WRITE instruction: " + operand);
         }
+
         outputTape.head++;
     }
 
     private void load(InstructionCommand instructionCommand, String operand) {
-        if (operand == null) {
-            // Direct addressing: Load value into register[0]
+        if (operand == null || operand.isEmpty()) {
+            // Indexed addressing: Load value from register[instructionCommand.value] into register[0]
             register.set(0, register.get(instructionCommand.value));
         } else if (operand.equals("=")) {
-            // Constant addressing: Load constant value into register[0]
+            // Constant addressing: Load constant value (instructionCommand.value) into register[0]
             register.set(0, instructionCommand.value);
         } else if (operand.equals("*")) {
-            // Indirect addressing: Load value from tape into register[0]
-            register.set(0, inputTape.content.get(inputTape.head + instructionCommand.value));
+            // Indirect addressing: Load value from the tape at the position specified by register[instructionCommand.value] into register[0]
+            int address = register.get(instructionCommand.value); // Address in the tape
+            int valueFromTape = inputTape.content.get(address);   // Value from the tape
+            register.set(0, valueFromTape);                       // Load the value into register[0]
+        } else {
+            throw new IllegalArgumentException("Unknown operand type: " + operand);
         }
     }
 
@@ -126,12 +148,16 @@ public class RAM {
         }
     }
 
+
     private void sub(InstructionCommand instructionCommand, String operand) {
-        if (operand == null) {
-            // Direct addressing: Subtract value from register[operand] from register[0]
+        if (operand == null || operand.equals("")) {
+            // Direct addressing: Subtract value from register[operand] (indexed by instructionCommand.value)
             register.set(0, register.get(0) - register.get(instructionCommand.value));
+        } else if (operand.equals("=")) {
+            // Constant addressing: Subtract constant value from register[0]
+            register.set(0, register.get(0) - instructionCommand.value);
         } else if (operand.equals("*")) {
-            // Indirect addressing: Subtract value from tape at register[0] + value from register[0]
+            // Indirect addressing: Subtract value from memory at register[0] + value
             register.set(0, register.get(0) - inputTape.content.get(register.get(0) + instructionCommand.value));
         }
     }
