@@ -1,6 +1,5 @@
 package org.osu;
 
-// TODO: delete unsused isnstructions
 public enum Instruction {
     READ,
     WRITE,
@@ -9,10 +8,8 @@ public enum Instruction {
     ADD,
     SUB,
     MUL,
-    DIV,
     JMP,
     JZ,
     JGTZ,
-    JH,
     HALT
 }

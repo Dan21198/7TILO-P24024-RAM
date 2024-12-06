@@ -34,7 +34,6 @@ public class RAM {
                 case ADD -> add(c, c.operand);
                 case SUB -> sub(c, c.operand);
                 case MUL -> mul(c);
-                case DIV -> div(c, c.operand);
                 case JMP -> jump(c.value);
                 case JZ -> jumpZero(c.value);
                 case JGTZ -> jumpGreaterThanZero(c.value);
@@ -63,7 +62,6 @@ public class RAM {
     }
 
     private void read(String operand) {
-        // Get the value at the current head position of the input tape
         int value = inputTape.content.get(inputTape.head);
         System.out.println("Reading value: " + value);
 
@@ -71,12 +69,9 @@ public class RAM {
             // If operand is empty, store the value in register[0]
             register.set(0, value);
         } else {
-            // If operand is not empty, store the value in the specified register
-            int registerIndex = Integer.parseInt(operand); // Convert operand to register index
-            register.set(registerIndex, value);
+            throw new IllegalArgumentException("Invalid operand for WRITE instruction: " + operand);
         }
 
-        // Move the tape head to the next symbol after reading
         inputTape.head++;
     }
 
@@ -111,9 +106,9 @@ public class RAM {
             register.set(0, instructionCommand.value);
         } else if (operand.equals("*")) {
             // Indirect addressing: Load value from the tape at the position specified by register[instructionCommand.value] into register[0]
-            int address = register.get(instructionCommand.value); // Address in the tape
-            int valueFromTape = inputTape.content.get(address);   // Value from the tape
-            register.set(0, valueFromTape);                       // Load the value into register[0]
+            int address = register.get(instructionCommand.value);
+            int valueFromTape = inputTape.content.get(address);
+            register.set(0, valueFromTape);
         } else {
             throw new IllegalArgumentException("Unknown operand type: " + operand);
         }
@@ -176,23 +171,8 @@ public class RAM {
                 // Accumulate result in register[0]
                 register.set(0, register.get(0) * inputTape.content.get(address));
             } else {
-                // Handle out of bounds or invalid index
                 throw new RuntimeException("Invalid indirect address: " + address);
             }
-        }
-    }
-
-
-    private void div(InstructionCommand instructionCommand, String operand) {
-        if (operand == null) {
-            // Direct addressing: Divide register[0] by value in register[operand]
-            register.set(0, register.get(0) / register.get(instructionCommand.value));
-        } else if (operand.equals("=")) {
-            // Constant addressing: Divide register[0] by constant value
-            register.set(0, register.get(0) / instructionCommand.value);
-        } else if (operand.equals("*")) {
-            // Indirect addressing: Divide register[0] by value from tape at register[0] + value
-            register.set(0, register.get(0) / inputTape.content.get(register.get(0) + instructionCommand.value));
         }
     }
 
